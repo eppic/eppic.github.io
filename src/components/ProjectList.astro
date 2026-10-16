@@ -1,0 +1,124 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ProjectCard from './ProjectCard.astro';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+	projects: CollectionEntry<'projects'>[];
+}
+
+const t = useTranslations();
+
+// Standard: nach Wichtigkeit (priority), bei Gleichstand neueste zuerst.
+// Muss zum Vergleich "featured" im Client-Script unten passen.
+const priorityOf = (p: CollectionEntry<'projects'>) => p.data.priority ?? Number.MAX_SAFE_INTEGER;
+const projects = [...Astro.props.projects].sort(
+	(a, b) => priorityOf(a) - priorityOf(b) || b.data.date.getTime() - a.data.date.getTime(),
+);
+
+const sortButtons = [
+	{ mode: 'featured', label: t('list.sortFeatured') },
+	{ mode: 'newest', label: t('list.sortNewest') },
+	{ mode: 'alpha', label: t('list.sortAlpha') },
+];
+---
+
+<section aria-labelledby="projects-heading">
+	<div class="mb-6 flex items-center justify-between gap-4" data-animate data-animate-delay="0.15">
+		<h2 id="projects-heading" class="text-xs font-semibold tracking-widest text-muted uppercase">
+			{t('list.heading')} <span class="tabular-nums">({projects.length})</span>
+		</h2>
+		<div
+			class="inline-flex rounded-full border border-border bg-surface p-1 text-sm"
+			role="group"
+			aria-label={t('list.sortLabel')}
+			data-sort-controls
+		>
+			{sortButtons.map(({ mode, label }, i) => (
+				<button
+					type="button"
+					data-sort={mode}
+					aria-pressed={i === 0 ? 'true' : 'false'}
+					class="cursor-pointer rounded-full px-3.5 py-1.5 text-muted transition-colors hover:text-fg aria-pressed:bg-fg aria-pressed:text-bg"
+				>
+					{label}
+				</button>
+			))}
+		</div>
+	</div>
+
+	{
+		projects.length === 0 ? (
+			<p class="text-muted">{t('list.empty')}</p>
+		) : (
+			<ul class="flex flex-col gap-3" data-project-list>
+				{projects.map((project, i) => (
+					<li
+						data-title={project.data.title}
+						data-date={project.data.date.getTime()}
+						data-priority={priorityOf(project)}
+						data-animate
+						data-animate-delay={String(0.2 + i * 0.06)}
+					>
+						<ProjectCard project={project} />
+					</li>
+				))}
+			</ul>
+		)
+	}
+</section>
+
+<script>
+	import { animate, stagger } from 'motion';
+
+	type SortMode = 'featured' | 'newest' | 'alpha';
+
+	const byNewest = (a: HTMLElement, b: HTMLElement) =>
+		Number(b.dataset.date) - Number(a.dataset.date);
+
+	const comparators: Record<SortMode, (a: HTMLElement, b: HTMLElement) => number> = {
+		featured: (a, b) =>
+			Number(a.dataset.priority) - Number(b.dataset.priority) || byNewest(a, b),
+		newest: byNewest,
+		alpha: (a, b) =>
+			(a.dataset.title ?? '').localeCompare(b.dataset.title ?? '', 'de', { sensitivity: 'base' }),
+	};
+
+	function initSorting() {
+		const controls = document.querySelector<HTMLElement>('[data-sort-controls]');
+		const list = document.querySelector<HTMLElement>('[data-project-list]');
+		if (!controls || !list) return;
+
+		const buttons = controls.querySelectorAll<HTMLButtonElement>('button[data-sort]');
+		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		let busy = false;
+
+		buttons.forEach((button) => {
+			button.addEventListener('click', async () => {
+				const mode = button.dataset.sort as SortMode;
+				if (busy || button.getAttribute('aria-pressed') === 'true') return;
+				busy = true;
+
+				buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+
+				const items = Array.from(list.children) as HTMLElement[];
+				const sorted = [...items].sort(comparators[mode]);
+
+				if (!reducedMotion) {
+					await animate(items, { opacity: 0, y: 8 }, { duration: 0.15, ease: 'easeIn' });
+				}
+				list.append(...sorted);
+				if (!reducedMotion) {
+					await animate(
+						sorted,
+						{ opacity: [0, 1], y: [8, 0] },
+						{ duration: 0.35, delay: stagger(0.04), ease: [0.22, 1, 0.36, 1] },
+					);
+				}
+				busy = false;
+			});
+		});
+	}
+
+	document.addEventListener('astro:page-load', initSorting);
+</script>

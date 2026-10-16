@@ -1,0 +1,33 @@
+---
+import GithubIcon from './GithubIcon.astro';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations();
+const year = new Date().getFullYear();
+
+// TODO: eigene Kontaktdaten eintragen
+const email = 'kontakt@example.com';
+---
+
+<footer class="mt-24 border-t border-border py-10 text-sm text-muted">
+	<div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+		<div>
+			<h2 class="mb-2 text-xs font-semibold tracking-widest text-fg uppercase">
+				{t('footer.contact')}
+			</h2>
+			<a href={`mailto:${email}`} class="transition-colors hover:text-accent-strong">{email}</a>
+		</div>
+		<div class="flex items-center gap-5">
+			<a
+				href="https://github.com/eppic"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="inline-flex items-center gap-2 transition-colors hover:text-fg"
+			>
+				<GithubIcon class="size-4" />
+				eppic
+			</a>
+			<span>© {year} {t('footer.rights')}</span>
+		</div>
+	</div>
+</footer>

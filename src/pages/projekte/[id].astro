@@ -1,0 +1,153 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import GithubIcon from '../../components/GithubIcon.astro';
+import { href, useTranslations } from '../../i18n/ui';
+
+export const getStaticPaths = (async () => {
+	const projects = await getCollection('projects');
+	return projects.map((project) => ({ params: { id: project.id }, props: { project } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+	project: CollectionEntry<'projects'>;
+}
+
+const t = useTranslations();
+const { project } = Astro.props;
+const { title, summary, logo, screenshots, url, github, tech, date, collaborators, role } =
+	project.data;
+const { Content } = await render(project);
+const hasTeam = !!collaborators?.length;
+
+const sectionHeading = 'mb-3 text-xs font-semibold tracking-widest text-muted uppercase';
+---
+
+<Layout title={title} description={summary}>
+	<article class="flex flex-col gap-12">
+		<a
+			href={href()}
+			class="-mb-4 inline-flex w-fit items-center gap-2 text-sm text-muted transition-colors hover:text-accent-strong"
+		>
+			<span aria-hidden="true">←</span>
+			{t('project.back')}
+		</a>
+
+		<!-- Kopf: Logo, Titel, Jahr, Links -->
+		<header class="flex flex-col gap-6 sm:flex-row sm:items-center">
+			<Image
+				src={logo}
+				alt={`Logo von ${title}`}
+				width={192}
+				height={192}
+				class="size-20 rounded-2xl object-cover sm:size-24"
+				transition:name={`logo-${project.id}`}
+			/>
+			<div class="flex-1">
+				<p class="text-sm text-muted tabular-nums">{date.getFullYear()}</p>
+				<h2 class="text-3xl font-bold tracking-tight sm:text-4xl" transition:name={`title-${project.id}`}>
+					{title}
+				</h2>
+				<p class="mt-2 text-muted">{summary}</p>
+			</div>
+		</header>
+
+		{
+			(url || github) && (
+				<div class="flex flex-wrap gap-3" data-animate>
+					{url && (
+						<a
+							href={url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="inline-flex items-center gap-2 rounded-full bg-fg px-5 py-2.5 text-sm font-medium text-bg transition hover:opacity-85"
+						>
+							{t('project.visit')}
+							<span aria-hidden="true">↗</span>
+						</a>
+					)}
+					{github && (
+						<a
+							href={github}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:border-accent-strong"
+						>
+							<GithubIcon class="size-4" />
+							{t('project.github')}
+						</a>
+					)}
+				</div>
+			)
+		}
+
+		<section data-animate>
+			<h3 class={sectionHeading}>{t('project.description')}</h3>
+			<div class="prose-project">
+				<Content />
+			</div>
+		</section>
+
+		<div class="grid gap-10 sm:grid-cols-2" data-animate>
+			<section>
+				<h3 class={sectionHeading}>{t('project.tech')}</h3>
+				<ul class="flex flex-wrap gap-2">
+					{tech.map((item) => (
+						<li class="rounded-full bg-accent/40 px-3 py-1 text-sm dark:bg-accent/10">{item}</li>
+					))}
+				</ul>
+			</section>
+
+			<section>
+				<h3 class={sectionHeading}>{t('project.team')}</h3>
+				<ul class="space-y-1">
+					<li>
+						<a href="https://github.com/eppic" target="_blank" rel="noopener noreferrer" class="hover:text-accent-strong">
+							{t('project.me')}
+						</a>
+					</li>
+					{collaborators?.map((person) => (
+						<li>
+							{person.github ? (
+								<a href={person.github} target="_blank" rel="noopener noreferrer" class="hover:text-accent-strong">
+									{person.name}
+								</a>
+							) : (
+								person.name
+							)}
+						</li>
+					))}
+				</ul>
+				{hasTeam && role && (
+					<p class="mt-4 text-sm">
+						<span class="text-muted">{t('project.role')}:</span> {role}
+					</p>
+				)}
+			</section>
+		</div>
+
+		{
+			screenshots && screenshots.length > 0 && (
+				<section>
+					<h3 class={sectionHeading} data-animate>{t('project.screenshots')}</h3>
+					<div class="grid gap-6 sm:grid-cols-2">
+						{screenshots.map((shot, i) => (
+							<figure data-animate data-animate-delay={String((i % 2) * 0.08)}>
+								<Image
+									src={shot.src}
+									alt={shot.caption}
+									widths={[480, 960, 1440]}
+									sizes="(min-width: 640px) 50vw, 100vw"
+									class="w-full rounded-xl border border-border"
+								/>
+								<figcaption class="mt-2 text-sm text-muted">{shot.caption}</figcaption>
+							</figure>
+						))}
+					</div>
+				</section>
+			)
+		}
+	</article>
+</Layout>

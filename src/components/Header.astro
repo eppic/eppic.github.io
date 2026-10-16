@@ -1,0 +1,32 @@
+---
+import GithubIcon from './GithubIcon.astro';
+import { href, useTranslations } from '../i18n/ui';
+
+const t = useTranslations();
+---
+
+<header class="flex items-start justify-between gap-6 pt-14 pb-12 sm:pt-20 sm:pb-16">
+	<a href={href()} class="group block" data-animate>
+		<h1
+			class="text-5xl leading-none font-extrabold tracking-tight uppercase sm:text-7xl"
+			transition:name="site-title"
+		>
+			{t('site.title')}
+		</h1>
+		<p class="mt-3 text-lg text-muted transition-colors group-hover:text-accent-strong sm:text-xl">
+			{t('site.byline')}
+		</p>
+	</a>
+	<a
+		href="https://github.com/eppic"
+		target="_blank"
+		rel="noopener noreferrer"
+		class="mt-1 inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-2 text-sm text-muted transition-colors hover:border-accent-strong hover:text-fg"
+		data-animate
+		data-animate-delay="0.1"
+	>
+		<GithubIcon class="size-4" />
+		<span class="hidden sm:inline">eppic</span>
+		<span class="sr-only sm:hidden">GitHub-Profil eppic</span>
+	</a>
+</header>
