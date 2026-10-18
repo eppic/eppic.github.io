@@ -4,6 +4,7 @@ export const ui = {
 	de: {
 		'site.title': 'Portfolio',
 		'site.byline': 'von Nico W.',
+		'site.profileAlt': 'Profilbild von Nico W.',
 		'site.description': 'Portfolio von Nico W. – Projekte als Web Developer.',
 		'list.heading': 'Projekte',
 		'list.sortLabel': 'Sortieren',
