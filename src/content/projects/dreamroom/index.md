@@ -27,7 +27,7 @@ role: Oberfläche (HTML & Tailwind), Design, alle Möbel-Grafiken als SVG und Mi
 
 **DreamRoom** ist ein einfaches Einrichtungs-Tool im Browser, entstanden als Projekt an der **FH Salzburg** zusammen mit Lukas M. Man kann damit Möbel aus einer Bibliothek auswählen, auf einem Raster platzieren, verschieben und drehen, bis die Einrichtung passt.
 
-Ich habe die komplette Oberfläche mit HTML und Tailwind CSS umgesetzt, das Design entworfen und alle Möbelstücke als SVG mit Figma entworfen. An der Raster-Logik habe ich mitgearbeitet; einen Großteil der Editor-Logik hat Lukas umgesetzt.
+Ich habe die komplette Oberfläche mit HTML und Tailwind CSS umgesetzt, das Design entworfen und alle Möbelstücke als SVG mit Figma entworfen. An der Raster-Logik habe ich mitgearbeitet, einen Großteil der Editor-Logik hat Lukas umgesetzt.
 
 ## Features
 
